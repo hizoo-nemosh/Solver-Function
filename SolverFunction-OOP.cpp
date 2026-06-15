@@ -167,13 +167,13 @@ class App
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n";
     std::cout << "Выберите вид функций\n";
-    std::cout << "1.Линейная\n";          //kx+b 2 переменные
-    std::cout << "2.Квадратичная\n";        //ax^2+bx+c 3 переменных
-    std::cout << "3.Кубическая\n";          //ax^3+bx^2+cx+d 4 переменных
-    std::cout << "4.Модуль\n";            //|x| 1 переменная
-    std::cout << "5.Корень\n";            // √x 1 переменная
-    std::cout << "6.Обратная пропорциональность\n"; // k/x 2 переменных
-    std::cout << "7.Показательная функция\n";   // a^x 2 переменные
+    std::cout << "1.Линейная\n";                     //kx+b 2 переменные
+    std::cout << "2.Квадратичная\n";                 //ax^2+bx+c 3 переменных
+    std::cout << "3.Кубическая\n";                   //ax^3+bx^2+cx+d 4 переменных
+    std::cout << "4.Модуль\n";                       //|x| 1 переменная
+    std::cout << "5.Корень\n";                       // √x 1 переменная
+    std::cout << "6.Обратная пропорциональность\n";  // k/x 2 переменных
+    std::cout << "7.Показательная функция\n";        // a^x 2 переменные
     std::cout << "8.About\n\n";
   }
 
@@ -184,9 +184,9 @@ class App
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
     std::cout << "Author: Nainkoo, 13 y.o\n";
+    std::cout << "How project: OOP, Template,  Lambda expression, Factory";
     std::cout << "Version: 1.0\n";
     std::cout << "License: MIT\n";
-    std::cout << "How project: OOP, Template,  Lambda expression, Factory";
     std::cout << "";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
