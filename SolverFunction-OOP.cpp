@@ -18,7 +18,8 @@ enum class FunctionType
   SquareRoot = 5,
   InverseProportion = 6,
   Exponential = 7,
-  About = 8
+  About = 8,
+  Exit = 9
 };
 
 class MathFunction
@@ -36,6 +37,7 @@ class MathFunction
   virtual std::vector<double> Derivative() = 0;
   virtual std::vector<double> Integrate() = 0;
   virtual std::vector<double> Analysis() = 0;
+
 };
 
 class LinearFunction : public MathFunction
@@ -71,6 +73,7 @@ class LinearFunction : public MathFunction
 
     return {}; //заглушка
   }
+
 };
 
 class QuadraticFunction : public MathFunction
@@ -122,6 +125,7 @@ class QuadraticFunction : public MathFunction
 
     return {}; //заглушка
   }
+
 };
 
 class FunctionFactory
@@ -182,7 +186,8 @@ class App
     std::cout << "5.Корень\n";                       // √x 1 переменная
     std::cout << "6.Обратная пропорциональность\n";  // k/x 2 переменных
     std::cout << "7.Показательная функция\n";        // a^x 2 переменные
-    std::cout << "8.About\n\n";
+    std::cout << "8.About\n";
+    std::cout << "9.Выход\n\n";
   }
 
   void showAbout()
@@ -202,7 +207,7 @@ class App
   FunctionType selectFunction()
   {
     drawMenu();
-    int choiceOptions = inputAndCheck<int>("Выберете пункт меню: ", "Ошибка! Неверный пункт меню", [](int x) { return x >= 1 && x <= 8; });
+    int choiceOptions = inputAndCheck<int>("Выберете пункт меню: ", "Ошибка! Неверный пункт меню", [](int x) { return x >= 1 && x <= 9; });
     FunctionType choice = static_cast<FunctionType>(choiceOptions);
     return choice;
   }
@@ -258,9 +263,10 @@ class App
     std::vector<double> coefficients;
     for (int i = 0; i < count; i++)
     {
-      double x = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
-      coefficients.push_back(x);
-    }
+
+      double item = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
+      coefficients.push_back(item);
+        }
     return coefficients;
   }
 
@@ -284,6 +290,10 @@ class App
   void Run()
   {
     FunctionType type = selectFunction();
+    if (type == FunctionType::Exit) {
+      std::cout << "Выход из программы" << std::endl;
+      return;
+    }
     if (type == FunctionType::About)
     {
       showAbout();

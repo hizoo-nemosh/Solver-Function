@@ -1,0 +1,22 @@
+# 1. Сборка и исполняемые файлы
+build/
+solver-app
+solver_app
+*.exe
+*.out
+*.app
+*.so
+*.dylib
+
+# 2. Настройки IDE и редакторов
+.vscode/
+.idea/
+.vs/
+*.swp
+*.suo
+*.user
+
+# 3. Системные файлы
+.DS_Store
+Thumbs.db
+
