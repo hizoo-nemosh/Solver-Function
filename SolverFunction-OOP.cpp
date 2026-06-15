@@ -1,10 +1,12 @@
 #include <cmath>
+#include <ios>
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <vector>
 #include <limits>
 #include <string>
-#include <functional>
+#include <cstdlib>
 //#include <complex>
 
 enum class FunctionType
@@ -26,12 +28,12 @@ class MathFunction
   const double EPS = 1e-9;
 
   public:
-  MathFunction(std::vector<double> coeffs) : m_coeffs(coeffs) {}
+  MathFunction(std::vector<double> coeffs) : m_coeffs(std::move(coeffs)) {}
 
   virtual ~MathFunction() {}
 
   virtual std::vector<double> Solve() = 0;
-  virtual std::vector<double> Derivative() = 0; //изменить на нормальные типы и начать делать методы
+  virtual std::vector<double> Derivative() = 0;
   virtual std::vector<double> Integrate() = 0;
   virtual std::vector<double> Analysis() = 0;
 };
@@ -39,7 +41,7 @@ class MathFunction
 class LinearFunction : public MathFunction
 {
   public:
-  LinearFunction(std::vector<double> coeffs) : MathFunction(coeffs) {}
+  LinearFunction(std::vector<double> coeffs) : MathFunction(std::move(coeffs)) {}
 
   std::vector<double> Solve() override
   {
@@ -110,7 +112,7 @@ class QuadraticFunction : public MathFunction
   }
 
   std::vector<double> Integrate() override
-  { // тут сделаю логику интеграла и геометрической площадь
+  { // тут сделаю логику интеграла и геометрической площади
 
     return {}; //заглушка
   }
@@ -159,7 +161,13 @@ class FunctionFactory
 class App
 {
   private:
-  const std::string clear = "\033[2J\033[H";
+  void clearScreen() {
+    #if defined (_WiN32) || defined (_WIN64)
+    std::system("cls");
+    #else
+    std::system("clear");
+    #endif
+  }
 
   void drawMenu()
   {
@@ -179,7 +187,7 @@ class App
 
   void showAbout()
   {
-    std::cout << clear;
+    clearScreen();
     std::cout << "╔═════════════════════════════╗\n";
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
@@ -188,39 +196,41 @@ class App
     std::cout << "Version: 1.0\n";
     std::cout << "License: MIT\n";
     std::cout << "";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
   }
 
   FunctionType selectFunction()
   {
     drawMenu();
-    int choiceOptions = inputAndCheck<int>([](int x) { return x >= 1 && x <= 8; });
+    int choiceOptions = inputAndCheck<int>("Выберете пункт меню: ", "Ошибка! Неверный пункт меню", [](int x) { return x >= 1 && x <= 8; });
     FunctionType choice = static_cast<FunctionType>(choiceOptions);
     return choice;
   }
 
-  template<typename T> T
-   inputAndCheck(std::function<bool(T)> isValid)
+  template<typename T, typename  Predicate> 
+  T inputAndCheck(const std::string& message, const std::string& rangeErrorMessage, Predicate isValid)
   {
     T num;
     while (true)
     {
-      std::cin >> num;
-      if (std::cin.fail() || std::abs(num) >= 1e9)
-      {
+      std::cout << message;
+      if (!(std::cin >> num)) {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Неверный ввод! Повтори: ";
+        std::cout << "Ошибка! Введите число\n" << std::endl;
+        continue;
       }
-      else
-      {
-        if (isValid(num)){
-        return num; 
-        }
+      if (!isValid(num)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << rangeErrorMessage << "\n" << std::endl;
+        continue;
       }
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      return num;
     }
-  }
+      }
+    
 
   int getCoeffsCount(FunctionType choice)
   {
@@ -248,7 +258,7 @@ class App
     std::vector<double> coefficients;
     for (int i = 0; i < count; i++)
     {
-      double x = inputAndCheck<double>([](double val) { return std::abs(val) < 1e9; });
+      double x = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
       coefficients.push_back(x);
     }
     return coefficients;
