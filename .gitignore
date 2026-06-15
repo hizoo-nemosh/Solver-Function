@@ -1,5 +1,6 @@
 # 1. Сборка и исполняемые файлы
 build/
+SolverFunction-OOP
 solver-app
 solver_app
 *.exe
