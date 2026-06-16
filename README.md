@@ -42,7 +42,7 @@ The engine exposes four virtual operation vectors (Solve(), Derivative(), Integr
 
 | Function Class | Analytical Target | Solve() | Derivative / Integrate / Analysis |
 | :--- | :--- | :--- | :--- |
-| **Linear** | kx + b = 0 | Implemented | Planned  | Implemented |
+| **Linear** | kx + b = 0 | Implemented | Planned (Phase 2) | 
 | **Quadratic** | ax² + bx + c = 0 | Implemented (Real Roots) | Planned (Phase 2) |
 
 Note: Support for Cubic, Absolute Value, Square Root, and Exponential functions is structured in the core architecture and will be integrated into future releases.
@@ -127,3 +127,5 @@ g++ -std=c++17 SolverFunction-OOP.cpp -o solver-app
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Note:** This project is created by a 13-year-old student learning C++. Some features are marked as "Planned" and will be implemented as I continue learning.
