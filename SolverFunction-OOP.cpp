@@ -79,7 +79,7 @@ class LinearFunction : public MathFunction
 class QuadraticFunction : public MathFunction
 {
   public:
-  QuadraticFunction(std::vector<double> coeffs) : MathFunction(coeffs) {}
+  QuadraticFunction(std::vector<double> coeffs) : MathFunction(std::move(coeffs)) {}
 
   std::vector<double> Solve() override
   {
@@ -131,6 +131,7 @@ class QuadraticFunction : public MathFunction
 class FunctionFactory
 {
   public:
+  
   static std::unique_ptr<MathFunction> CreateFunction(FunctionType type, const std::vector<double> &coefficients)
   {
     switch (type)
@@ -165,8 +166,9 @@ class FunctionFactory
 class App
 {
   private:
+  
   void clearScreen() {
-    #if defined (_WiN32) || defined (_WIN64)
+    #if defined (_WIN32) || defined (_WIN64)
     std::system("cls");
     #else
     std::system("clear");
@@ -197,7 +199,7 @@ class App
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
     std::cout << "Author: Nainkoo, 13 y.o\n";
-    std::cout << "How project: OOP, Template,  Lambda expression, Factory";
+    std::cout << "How project: OOP, Template,  Lambda expression, Factory\n";
     std::cout << "Version: 1.0\n";
     std::cout << "License: MIT\n";
     std::cout << "";
@@ -236,7 +238,6 @@ class App
     }
       }
     
-
   int getCoeffsCount(FunctionType choice)
   {
     switch (choice)
@@ -257,13 +258,11 @@ class App
     }
     return 0;
   }
-
   std::vector<double> collectCoefficients(int count)
   {
     std::vector<double> coefficients;
     for (int i = 0; i < count; i++)
     {
-
       double item = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
       coefficients.push_back(item);
         }
@@ -287,6 +286,7 @@ class App
   }
 
   public:
+  
   void Run()
   {
     FunctionType type = selectFunction();
