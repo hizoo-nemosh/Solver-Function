@@ -1,10 +1,8 @@
 #include <cmath>
 #include <cstdlib>
-#include <ios>
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <vector>
 // #include <complex>
@@ -31,11 +29,11 @@ public:
 
   virtual ~MathFunction() {}
 
-  virtual std::vector<double> Solve() = 0;
-  virtual std::vector<double> Derivative() = 0;
+  virtual std::vector<double> Solve() const = 0;
+  virtual std::vector<double> Derivative() const = 0;
   virtual std::vector<double> Integrate(double upper_limit,
-                                        double lower_limit) = 0;
-  virtual std::vector<double> Analysis() = 0;
+                                        double lower_limit) const = 0;
+  virtual std::vector<double> Analysis() const = 0;
 };
 
 class LinearFunction : public MathFunction {
@@ -43,7 +41,7 @@ public:
   LinearFunction(std::vector<double> coeffs)
       : MathFunction(std::move(coeffs)) {}
 
-  std::vector<double> Solve() override {
+  std::vector<double> Solve() const override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
     if (std::abs(a) < EPS) {
@@ -52,10 +50,10 @@ public:
     return {-b / a};
   }
 
-  std::vector<double> Derivative() override { return {}; }
+  std::vector<double> Derivative() const override { return {}; }
 
   std::vector<double> Integrate(double upper_limit,
-                                double lower_limit) override {
+                                double lower_limit) const override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
 
@@ -87,7 +85,7 @@ public:
     return {integral_sum, geometric_area};
   }
 
-  std::vector<double> Analysis() override { return {}; }
+  std::vector<double> Analysis() const override { return {}; }
 };
 
 class QuadraticFunction : public MathFunction {
@@ -95,7 +93,7 @@ public:
   QuadraticFunction(std::vector<double> coeffs)
       : MathFunction(std::move(coeffs)) {}
 
-  std::vector<double> Solve() override {
+  std::vector<double> Solve() const override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
     double c = m_coeffs[2];
@@ -112,18 +110,17 @@ public:
     } else {
       return {}; // пока что без комплексных чисел
     }
-    return {};
   }
 
-  std::vector<double> Derivative() override { return {}; }
+  std::vector<double> Derivative() const override { return {}; }
 
   std::vector<double> Integrate(double upper_limit,
-                                double lower_limit) override {
+                                double lower_limit) const override {
 
     return {};
   }
 
-  std::vector<double> Analysis() override { return {}; }
+  std::vector<double> Analysis() const override { return {}; }
 };
 
 class FunctionFactory {
@@ -169,13 +166,13 @@ private:
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n";
     std::cout << "Выберите вид функций\n";
-    std::cout << "1.Линейная\n";     // kx+b 2 переменные
-    std::cout << "2.Квадратичная\n"; // ax^2+bx+c 3 переменных
-    std::cout << "3.Кубическая\n";   // ax^3+bx^2+cx+d 4 переменных
-    std::cout << "4.Модуль\n";       //|x| 1 переменная
-    std::cout << "5.Корень\n";       // √x 1 переменная
-    std::cout << "6.Обратная пропорциональность\n"; // k/x 2 переменных
-    std::cout << "7.Показательная функция\n"; // a^x 2 переменные
+    std::cout << "1.Линейная\n";           // kx+b 2 переменные
+    std::cout << "2.Квадратичная\n";       // ax^2+bx+c 3 переменных
+    std::cout << "3.Кубическая [скоро]\n"; // ax^3+bx^2+cx+d 4 переменных
+    std::cout << "4.Модуль [скоро]\n";     //|x| 1 переменная
+    std::cout << "5.Корень [скоро]\n";     // √x 1 переменная
+    std::cout << "6.Обратная пропорциональность [скоро]\n"; // k/x 2 переменных
+    std::cout << "7.Показательная функция [скоро]\n"; // a^x 2 переменные
     std::cout << "8.About\n";
     std::cout << "9.Выход\n\n";
   }
@@ -186,10 +183,10 @@ private:
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
     std::cout << "Author: Nainkoo, 13 y.o\n";
-    std::cout << "How project: OOP, Template,  Lambda expression, Factory\n";
+    std::cout << "How project: OOP, Template, Lambda expression, Factory\n";
     std::cout << "Version: 0.1\n";
-    std::cout << "License: MIT\n";
-    std::cout << "";
+    std::cout << "License: MIT\n\n";
+    std::cout << "Нажмите Enter что бы вернуться ";
     std::cin.get();
   }
 
@@ -265,10 +262,12 @@ private:
     }
   }
   void printResultsIntegral(const std::vector<double> &integrals) {
-    double integral_sum = integrals[0];
-    double integral = integrals[1];
-    std::cout << "Интеграл: " << integral_sum << "\n";
-    std::cout << "Геометрическая площадь: " << integral << "\n";
+    if (integrals.size() < 2) {
+      std::cout << "Интеграл не вычислен";
+      return;
+    }
+    std::cout << "Интеграл: " << integrals[0] << "\n";
+    std::cout << "Геометрическая площадь: " << integrals[1] << "\n";
   }
 
 public:
@@ -276,13 +275,14 @@ public:
     while (true) {
       FunctionType type = selectFunction();
       if (type == FunctionType::Exit) {
-        std::cout << "Нажмите Enter для выхода: " << std::endl;
+        std::cout << "Нажмите Enter для выхода: ";
         std::cin.get();
         return;
       }
       if (type == FunctionType::About) {
         showAbout();
-        return;
+        clearScreen();
+        continue;
       }
       int count = getCoeffsCount(type);
       std::vector<double> coefficients = collectCoefficients(count);
@@ -297,7 +297,7 @@ public:
         double upp = inputAndCheck<double>(
             "Введите верхний предел: ", "Ошибка!",
             [](double val) { return std::abs(val) < 1e9; });
-        std::vector<double> integrals = func->Integrate(low, upp);
+        std::vector<double> integrals = func->Integrate(upp, low);
         printResultsIntegral(integrals);
       } else {
         std::cout << "Soon\n";
