@@ -1,16 +1,15 @@
 #include <cmath>
+#include <cstdlib>
 #include <ios>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <ostream>
-#include <vector>
-#include <limits>
 #include <string>
-#include <cstdlib>
-//#include <complex>
+#include <vector>
+// #include <complex>
 
-enum class FunctionType
-{
+enum class FunctionType {
   Linear = 1,
   Quadratic = 2,
   Cubic = 3,
@@ -22,132 +21,124 @@ enum class FunctionType
   Exit = 9
 };
 
-class MathFunction
-{
-  protected:
+class MathFunction {
+protected:
   std::vector<double> m_coeffs;
   const double EPS = 1e-9;
 
-  public:
+public:
   MathFunction(std::vector<double> coeffs) : m_coeffs(std::move(coeffs)) {}
 
   virtual ~MathFunction() {}
 
   virtual std::vector<double> Solve() = 0;
   virtual std::vector<double> Derivative() = 0;
-  virtual std::vector<double> Integrate() = 0;
+  virtual std::vector<double> Integrate(double upper_limit,
+                                        double lower_limit) = 0;
   virtual std::vector<double> Analysis() = 0;
-
 };
 
-class LinearFunction : public MathFunction
-{
-  public:
-  LinearFunction(std::vector<double> coeffs) : MathFunction(std::move(coeffs)) {}
+class LinearFunction : public MathFunction {
+public:
+  LinearFunction(std::vector<double> coeffs)
+      : MathFunction(std::move(coeffs)) {}
 
-  std::vector<double> Solve() override
-  {
+  std::vector<double> Solve() override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
-    if (std::abs(a) < EPS)
-    {
+    if (std::abs(a) < EPS) {
       return {};
     }
     return {-b / a};
   }
 
-  std::vector<double> Derivative() override
-  { // тут сделаю логику производной
+  std::vector<double> Derivative() override { return {}; }
 
-    return {}; //заглушка
+  std::vector<double> Integrate(double upper_limit,
+                                double lower_limit) override {
+    double a = m_coeffs[0];
+    double b = m_coeffs[1];
+
+    auto F = [a, b](double x) { return (a * x * x / 2.0) + (b * x); };
+
+    if (std::abs(a) < EPS && std::abs(b) < EPS)
+      return {0.0, 0.0};
+
+    double integral_sum = F(upper_limit) - F(lower_limit);
+
+    double min_lim = std::min(lower_limit, upper_limit);
+    double max_lim = std::max(lower_limit, upper_limit);
+    double geometric_area = 0.0;
+
+    if (std::abs(a) < EPS) {
+      geometric_area = std::abs(b) * (max_lim - min_lim);
+    } else {
+      double x0 = -b / a;
+
+      if (x0 > min_lim && x0 < max_lim) {
+        double area1 = F(x0) - F(min_lim);
+        double area2 = F(max_lim) - F(x0);
+        geometric_area = std::abs(area1) + std::abs(area2);
+      } else {
+        geometric_area = std::abs(F(max_lim) - F(min_lim));
+      }
+    }
+
+    return {integral_sum, geometric_area};
   }
 
-  std::vector<double> Integrate() override
-  { // тут сделаю логику интеграла и геометрической площадь
-
-    return {}; //заглушка
-  }
-
-  std::vector<double> Analysis() override
-  { // тут сделаю логику анализа функции
-
-    return {}; //заглушка
-  }
-
+  std::vector<double> Analysis() override { return {}; }
 };
 
-class QuadraticFunction : public MathFunction
-{
-  public:
-  QuadraticFunction(std::vector<double> coeffs) : MathFunction(std::move(coeffs)) {}
+class QuadraticFunction : public MathFunction {
+public:
+  QuadraticFunction(std::vector<double> coeffs)
+      : MathFunction(std::move(coeffs)) {}
 
-  std::vector<double> Solve() override
-  {
+  std::vector<double> Solve() override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
     double c = m_coeffs[2];
-    if (std::abs(a) < EPS)
-    {
+    if (std::abs(a) < EPS) {
       return {};
     }
     double D = b * b - 4 * a * c;
-    if (std::abs(D) < EPS)
-    {
+    if (std::abs(D) < EPS) {
       return {-b / (2 * a)};
-    }
-    else if (D > 0)
-    {
+    } else if (D > 0) {
       double x1 = (-b + std::sqrt(D)) / (2 * a);
       double x2 = (-b - std::sqrt(D)) / (2 * a);
       return {x1, x2};
-    }
-    else
-    {
+    } else {
       return {}; // пока что без комплексных чисел
     }
     return {};
   }
 
-  std::vector<double> Derivative() override
-  { // тут сделаю логику производной
+  std::vector<double> Derivative() override { return {}; }
 
-    return {}; //заглушка
+  std::vector<double> Integrate(double upper_limit,
+                                double lower_limit) override {
+
+    return {};
   }
 
-  std::vector<double> Integrate() override
-  { // тут сделаю логику интеграла и геометрической площади
-
-    return {}; //заглушка
-  }
-
-  std::vector<double> Analysis() override
-  { // тут сделаю логику анализа функции
-
-    return {}; //заглушка
-  }
-
+  std::vector<double> Analysis() override { return {}; }
 };
 
-class FunctionFactory
-{
-  public:
-  
-  static std::unique_ptr<MathFunction> CreateFunction(FunctionType type, const std::vector<double> &coefficients)
-  {
-    switch (type)
-    {
-    case FunctionType::Linear:
-    {
-      if (coefficients.size() < 2)
-      {
+class FunctionFactory {
+public:
+  static std::unique_ptr<MathFunction>
+  CreateFunction(FunctionType type, const std::vector<double> &coefficients) {
+    switch (type) {
+    case FunctionType::Linear: {
+      if (coefficients.size() < 2) {
         return nullptr;
       }
       return std::make_unique<LinearFunction>(coefficients);
     }
-    case FunctionType::Quadratic:
-    {
-      if (coefficients.size() < 3)
-      {
+    case FunctionType::Quadratic: {
+      if (coefficients.size() < 3) {
         return nullptr;
       }
       return std::make_unique<QuadraticFunction>(coefficients);
@@ -163,68 +154,59 @@ class FunctionFactory
   }
 };
 
-class App
-{
-  private:
-  
+class App {
+private:
   void clearScreen() {
-    #if defined (_WIN32) || defined (_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
     std::system("cls");
-    #else
+#else
     std::system("clear");
-    #endif
+#endif
   }
 
-  void drawMenu()
-  {
+  void drawMenu() {
     std::cout << "╔═════════════════════════════╗\n";
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n";
     std::cout << "Выберите вид функций\n";
-    std::cout << "1.Линейная\n";                     //kx+b 2 переменные
-    std::cout << "2.Квадратичная\n";                 //ax^2+bx+c 3 переменных
-    std::cout << "3.Кубическая\n";                   //ax^3+bx^2+cx+d 4 переменных
-    std::cout << "4.Модуль\n";                       //|x| 1 переменная
-    std::cout << "5.Корень\n";                       // √x 1 переменная
-    std::cout << "6.Обратная пропорциональность\n";  // k/x 2 переменных
-    std::cout << "7.Показательная функция\n";        // a^x 2 переменные
+    std::cout << "1.Линейная\n";     // kx+b 2 переменные
+    std::cout << "2.Квадратичная\n"; // ax^2+bx+c 3 переменных
+    std::cout << "3.Кубическая\n";   // ax^3+bx^2+cx+d 4 переменных
+    std::cout << "4.Модуль\n";       //|x| 1 переменная
+    std::cout << "5.Корень\n";       // √x 1 переменная
+    std::cout << "6.Обратная пропорциональность\n"; // k/x 2 переменных
+    std::cout << "7.Показательная функция\n"; // a^x 2 переменные
     std::cout << "8.About\n";
     std::cout << "9.Выход\n\n";
   }
 
-  void showAbout()
-  {
+  void showAbout() {
     clearScreen();
     std::cout << "╔═════════════════════════════╗\n";
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
     std::cout << "Author: Nainkoo, 13 y.o\n";
-<<<<<<< HEAD
     std::cout << "How project: OOP, Template,  Lambda expression, Factory\n";
-    std::cout << "Version: 1.0\n";
-=======
-    std::cout << "How project: OOP, Template,  Lambda expression, Factory";
     std::cout << "Version: 0.1\n";
->>>>>>> 68c2f9a (fix: minor bug fixes)
     std::cout << "License: MIT\n";
     std::cout << "";
     std::cin.get();
   }
 
-  FunctionType selectFunction()
-  {
+  FunctionType selectFunction() {
     drawMenu();
-    int choiceOptions = inputAndCheck<int>("Выберете пункт меню: ", "Ошибка! Неверный пункт меню", [](int x) { return x >= 1 && x <= 9; });
+    int choiceOptions = inputAndCheck<int>(
+        "Выберете пункт меню: ", "Ошибка! Неверный пункт меню",
+        [](int x) { return x >= 1 && x <= 9; });
     FunctionType choice = static_cast<FunctionType>(choiceOptions);
     return choice;
   }
 
-  template<typename T, typename  Predicate> 
-  T inputAndCheck(const std::string& message, const std::string& rangeErrorMessage, Predicate isValid)
-  {
+  template <typename T, typename Predicate>
+  T inputAndCheck(const std::string &message,
+                  const std::string &rangeErrorMessage, Predicate isValid) {
     T num;
-    while (true)
-    {
+    while (true) {
       std::cout << message;
       if (!(std::cin >> num)) {
         std::cin.clear();
@@ -241,12 +223,10 @@ class App
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       return num;
     }
-      }
-    
-  int getCoeffsCount(FunctionType choice)
-  {
-    switch (choice)
-    {
+  }
+
+  int getCoeffsCount(FunctionType choice) {
+    switch (choice) {
     case FunctionType::SquareRoot:
     case FunctionType::AbsoluteValue:
       return 1;
@@ -263,58 +243,73 @@ class App
     }
     return 0;
   }
-  std::vector<double> collectCoefficients(int count)
-  {
+  std::vector<double> collectCoefficients(int count) {
     std::vector<double> coefficients;
-    for (int i = 0; i < count; i++)
-    {
-      double item = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
-      coefficients.push_back(item);  }
+    for (int i = 0; i < count; i++) {
+      double item = inputAndCheck<double>(
+          "Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",
+          [](double val) { return std::abs(val) < 1e9; });
+      coefficients.push_back(item);
+    }
     return coefficients;
   }
 
-  void printResults(const std::vector<double> &roots)
-  {
-    if (roots.empty())
-    {
-      std::cout << "Решений нет";
+  void printResultsSolver(const std::vector<double> &roots) {
+    if (roots.empty()) {
+      std::cout << "Решений нет\n";
       return;
-    }
-    else
-    {
-      for (double root : roots)
-      {
+    } else {
+      for (double root : roots) {
         std::cout << "Корень: " << root << "\n";
       }
     }
   }
+  void printResultsIntegral(const std::vector<double> &integrals) {
+    double integral_sum = integrals[0];
+    double integral = integrals[1];
+    std::cout << "Интеграл: " << integral_sum << "\n";
+    std::cout << "Геометрическая площадь: " << integral << "\n";
+  }
 
-  public:
-  
-  void Run()
-  {
-    FunctionType type = selectFunction();
-    if (type == FunctionType::Exit) {
-      std::cout << "Нажмите Enter для выхода: " << std::endl;
-      std::cin.get();
-      return;
-    }
-    if (type == FunctionType::About)
-    {
-      showAbout();
-      return;
-    }
-    int count = getCoeffsCount(type);
-    std::vector<double> coefficients = collectCoefficients(count);
-    std::unique_ptr<MathFunction> func = FunctionFactory::CreateFunction(type, coefficients);
-    if (func != nullptr)
-    {
-      std::vector<double> roots = func->Solve();
-      printResults(roots);
-    }
-    else
-    {
-      std::cout << "Soon\n";
+public:
+  void Run() {
+    while (true) {
+      FunctionType type = selectFunction();
+      if (type == FunctionType::Exit) {
+        std::cout << "Нажмите Enter для выхода: " << std::endl;
+        std::cin.get();
+        return;
+      }
+      if (type == FunctionType::About) {
+        showAbout();
+        return;
+      }
+      int count = getCoeffsCount(type);
+      std::vector<double> coefficients = collectCoefficients(count);
+      std::unique_ptr<MathFunction> func =
+          FunctionFactory::CreateFunction(type, coefficients);
+      if (func != nullptr) {
+        std::vector<double> roots = func->Solve();
+        printResultsSolver(roots);
+        double low = inputAndCheck<double>(
+            "Введите нижний предел: ", "Ошибка!",
+            [](double val) { return std::abs(val) < 1e9; });
+        double upp = inputAndCheck<double>(
+            "Введите верхний предел: ", "Ошибка!",
+            [](double val) { return std::abs(val) < 1e9; });
+        std::vector<double> integrals = func->Integrate(low, upp);
+        printResultsIntegral(integrals);
+      } else {
+        std::cout << "Soon\n";
+      }
+      char exit =
+          inputAndCheck<char>("Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
+            return val == 'y' || val == 'n' || val == 'Y' || val == 'N';
+          });
+      if (exit == 'y') {
+        return;
+      }
+      clearScreen();
     }
   }
 };
