@@ -42,7 +42,7 @@ The engine exposes four virtual operation vectors (Solve(), Derivative(), Integr
 
 | Function Class | Analytical Target | Solve() | Derivative / Integrate / Analysis |
 | :--- | :--- | :--- | :--- |
-| **Linear** | kx + b = 0 | Implemented | Planned (Phase 2) |
+| **Linear** | kx + b = 0 | Implemented | Planned  | Implemented |
 | **Quadratic** | ax² + bx + c = 0 | Implemented (Real Roots) | Planned (Phase 2) |
 
 Note: Support for Cubic, Absolute Value, Square Root, and Exponential functions is structured in the core architecture and will be integrated into future releases.
@@ -94,7 +94,7 @@ T inputAndCheck(const std::string& message, const std::string& rangeErrorMessage
 * [ ] New Function Vectors: Complete concrete factory overrides for Cubic, Square Root, and Inverse Proportionality classes.
 
 ### Phase 3: UX & Infrastructure Refinement
-* [ ] Persistent Application Loop: Redesign the lifecycle manager inside App::Run() to enable returning to the main menu instead of immediate process termination.
+* [x] Persistent Application Loop: Redesign the lifecycle manager inside App::Run() to enable returning to the main menu instead of immediate process termination.
 * [ ] Localization Abstraction: Separate console messaging vectors into an independent locale block to support English and Russian interfaces.
 
 ---
