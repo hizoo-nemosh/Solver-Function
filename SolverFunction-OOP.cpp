@@ -275,7 +275,7 @@ public:
     while (true) {
       FunctionType type = selectFunction();
       if (type == FunctionType::Exit) {
-        std::cout << "Нажмите Enter для выхода: ";
+        std::cout << "Нажмите Enter для выхода ";
         std::cin.get();
         return;
       }
@@ -306,7 +306,7 @@ public:
           inputAndCheck<char>("Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
             return val == 'y' || val == 'n' || val == 'Y' || val == 'N';
           });
-      if (exit == 'y') {
+      if (exit == 'y' || exit == 'Y') {
         return;
       }
       clearScreen();
