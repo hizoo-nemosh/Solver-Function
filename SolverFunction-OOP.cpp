@@ -199,8 +199,13 @@ class App
     std::cout << "║       SolveFunction         ║\n";
     std::cout << "╚═════════════════════════════╝\n\n";
     std::cout << "Author: Nainkoo, 13 y.o\n";
+<<<<<<< HEAD
     std::cout << "How project: OOP, Template,  Lambda expression, Factory\n";
     std::cout << "Version: 1.0\n";
+=======
+    std::cout << "How project: OOP, Template,  Lambda expression, Factory";
+    std::cout << "Version: 0.1\n";
+>>>>>>> 68c2f9a (fix: minor bug fixes)
     std::cout << "License: MIT\n";
     std::cout << "";
     std::cin.get();
@@ -264,8 +269,7 @@ class App
     for (int i = 0; i < count; i++)
     {
       double item = inputAndCheck<double>("Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",[](double val) { return std::abs(val) < 1e9; });
-      coefficients.push_back(item);
-        }
+      coefficients.push_back(item);  }
     return coefficients;
   }
 
@@ -291,7 +295,8 @@ class App
   {
     FunctionType type = selectFunction();
     if (type == FunctionType::Exit) {
-      std::cout << "Выход из программы" << std::endl;
+      std::cout << "Нажмите Enter для выхода: " << std::endl;
+      std::cin.get();
       return;
     }
     if (type == FunctionType::About)
