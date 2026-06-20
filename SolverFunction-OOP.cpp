@@ -30,10 +30,9 @@ public:
   virtual ~MathFunction() {}
 
   virtual std::vector<double> Solve() const = 0;
-  virtual std::vector<double> Derivative() const = 0;
   virtual std::vector<double> Integrate(double upper_limit,
                                         double lower_limit) const = 0;
-  virtual std::vector<double> Analysis() const = 0;
+  virtual std::vector<double> AnalysisAndDerivative() const = 0;
 };
 
 class LinearFunction : public MathFunction {
@@ -49,8 +48,6 @@ public:
     }
     return {-b / a};
   }
-
-  std::vector<double> Derivative() const override { return {}; }
 
   std::vector<double> Integrate(double upper_limit,
                                 double lower_limit) const override {
@@ -85,7 +82,7 @@ public:
     return {integral_sum, geometric_area};
   }
 
-  std::vector<double> Analysis() const override { return {}; }
+  std::vector<double> AnalysisAndDerivative() const override { return {}; }
 };
 
 class QuadraticFunction : public MathFunction {
@@ -112,21 +109,18 @@ public:
     }
   }
 
-  std::vector<double> Derivative() const override { return {}; }
-
   std::vector<double> Integrate(double upper_limit,
                                 double lower_limit) const override {
-
     return {};
   }
 
-  std::vector<double> Analysis() const override { return {}; }
+  std::vector<double> AnalysisAndDerivative() const override { return {}; }
 };
 
 class FunctionFactory {
 public:
   static std::unique_ptr<MathFunction>
-  CreateFunction(FunctionType type, const std::vector<double> &coefficients) {
+  CreateFunction(FunctionType type, const std::vector<double> coefficients) {
     switch (type) {
     case FunctionType::Linear: {
       if (coefficients.size() < 2) {
@@ -151,57 +145,12 @@ public:
   }
 };
 
-class App {
-private:
-  void clearScreen() {
-#if defined(_WIN32) || defined(_WIN64)
-    std::system("cls");
-#else
-    std::system("clear");
-#endif
-  }
-
-  void drawMenu() {
-    std::cout << "╔═════════════════════════════╗\n";
-    std::cout << "║       SolveFunction         ║\n";
-    std::cout << "╚═════════════════════════════╝\n";
-    std::cout << "Выберите вид функций\n";
-    std::cout << "1.Линейная\n";           // kx+b 2 переменные
-    std::cout << "2.Квадратичная\n";       // ax^2+bx+c 3 переменных
-    std::cout << "3.Кубическая [скоро]\n"; // ax^3+bx^2+cx+d 4 переменных
-    std::cout << "4.Модуль [скоро]\n";     //|x| 1 переменная
-    std::cout << "5.Корень [скоро]\n";     // √x 1 переменная
-    std::cout << "6.Обратная пропорциональность [скоро]\n"; // k/x 2 переменных
-    std::cout << "7.Показательная функция [скоро]\n"; // a^x 2 переменные
-    std::cout << "8.About\n";
-    std::cout << "9.Выход\n\n";
-  }
-
-  void showAbout() {
-    clearScreen();
-    std::cout << "╔═════════════════════════════╗\n";
-    std::cout << "║       SolveFunction         ║\n";
-    std::cout << "╚═════════════════════════════╝\n\n";
-    std::cout << "Author: Nainkoo, 13 y.o\n";
-    std::cout << "How project: OOP, Template, Lambda expression, Factory\n";
-    std::cout << "Version: 0.1\n";
-    std::cout << "License: MIT\n\n";
-    std::cout << "Нажмите Enter что бы вернуться ";
-    std::cin.get();
-  }
-
-  FunctionType selectFunction() {
-    drawMenu();
-    int choiceOptions = inputAndCheck<int>(
-        "Выберете пункт меню: ", "Ошибка! Неверный пункт меню",
-        [](int x) { return x >= 1 && x <= 9; });
-    FunctionType choice = static_cast<FunctionType>(choiceOptions);
-    return choice;
-  }
-
+class Validator {
+public:
   template <typename T, typename Predicate>
-  T inputAndCheck(const std::string &message,
-                  const std::string &rangeErrorMessage, Predicate isValid) {
+  static T inputAndCheck(const std::string &message,
+                         const std::string &rangeErrorMessage,
+                         Predicate isValid) {
     T num;
     while (true) {
       std::cout << message;
@@ -221,34 +170,58 @@ private:
       return num;
     }
   }
+};
 
-  int getCoeffsCount(FunctionType choice) {
-    switch (choice) {
-    case FunctionType::SquareRoot:
-    case FunctionType::AbsoluteValue:
-      return 1;
-    case FunctionType::Linear:
-    case FunctionType::Exponential:
-    case FunctionType::InverseProportion:
-      return 2;
-    case FunctionType::Quadratic:
-      return 3;
-    case FunctionType::Cubic:
-      return 4;
-    default:
-      return 0;
-    }
-    return 0;
+class ConsoleUI {
+public:
+  void clearScreen() {
+#if defined(_WIN32) || defined(_WIN64)
+    std::system("cls");
+#else
+    std::system("clear");
+#endif
   }
-  std::vector<double> collectCoefficients(int count) {
-    std::vector<double> coefficients;
-    for (int i = 0; i < count; i++) {
-      double item = inputAndCheck<double>(
-          "Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",
-          [](double val) { return std::abs(val) < 1e9; });
-      coefficients.push_back(item);
-    }
-    return coefficients;
+
+  void drawMenu() {
+    std::cout << "╔════════════════════════════════════════╗\n";
+    std::cout << "║             SolveFunction              ║\n";
+    std::cout << "╚════════════════════════════════════════╝\n";
+    std::cout << "╔════════════════════════════════════════╗\n";
+    std::cout << "║ Выберите вид функций                   ║\n";
+    std::cout
+        << "║ 1.Линейная                             ║\n"; // kx+b 2 переменные
+    std::cout << "║ 2.Квадратичная                         ║\n"; // ax^2+bx+c 3
+                                                                 // переменных
+    std::cout
+        << "║ 3.Кубическая [скоро]                   ║\n"; // ax^3+bx^2+cx+d
+                                                           // 4 переменных
+    std::cout << "║ 4.Модуль [скоро]                       ║\n"; // a*|x-b|+c 3
+                                                                 // переменная
+    std::cout << "║ 5.Корень [скоро]                       ║\n"; // a*√(x-b)+c 3
+                                                                 // переменная
+    std::cout
+        << "║ 6.Обратная пропорциональность [скоро]  ║\n"; // k/x+b 2 переменных
+    std::cout
+        << "║ 7.Показательная функция [скоро]        ║\n"; // a^x+b 2 переменные
+    std::cout << "║ 8.About                                ║\n";
+    std::cout << "║ 9.Выход                                ║\n";
+    std::cout << "╚════════════════════════════════════════╝\n\n";
+  }
+
+  void showAbout() {
+    clearScreen();
+    std::cout << "╔════════════════════════════════════════════════════════╗\n";
+    std::cout << "║                   SolveFunction                        ║\n";
+    std::cout << "╚════════════════════════════════════════════════════════╝\n";
+    std::cout << "╔════════════════════════════════════════════════════════╗\n";
+    std::cout << "║Author: Nainkoo                                         ║\n";
+    std::cout << "║How project: OOP, Template, Lambda expression, Factory  ║\n";
+    std::cout << "║Version: 0.1-beta                                       ║\n";
+    std::cout << "║License: MIT                                            ║\n";
+    std::cout
+        << "╚════════════════════════════════════════════════════════╝\n\n";
+    std::cout << "Нажмите Enter что бы вернуться ";
+    std::cin.get();
   }
 
   void printResultsSolver(const std::vector<double> &roots) {
@@ -269,10 +242,50 @@ private:
     std::cout << "Интеграл: " << integrals[0] << "\n";
     std::cout << "Геометрическая площадь: " << integrals[1] << "\n";
   }
+};
+
+class App {
+private:
+  FunctionType selectFunction() {
+    int choiceOptions = Validator::inputAndCheck<int>(
+        "Выберете пункт меню: ", "Ошибка! Неверный пункт меню",
+        [](int x) { return x >= 1 && x <= 9; });
+    FunctionType choice = static_cast<FunctionType>(choiceOptions);
+    return choice;
+  }
+
+  int getCoeffsCount(FunctionType choice) {
+    switch (choice) {
+    case FunctionType::Linear:
+    case FunctionType::Exponential:
+    case FunctionType::InverseProportion:
+      return 2;
+    case FunctionType::SquareRoot:
+    case FunctionType::AbsoluteValue:
+    case FunctionType::Quadratic:
+      return 3;
+    case FunctionType::Cubic:
+      return 4;
+    default:
+      return 0;
+    }
+  }
+  std::vector<double> collectCoefficients(int count) {
+    std::vector<double> coefficients;
+    for (int i = 0; i < count; i++) {
+      double item = Validator::inputAndCheck<double>(
+          "Введите коэффицент: ", "Ошибка! Число должно быть меньше 1е9",
+          [](double val) { return std::abs(val) < 1e9; });
+      coefficients.push_back(item);
+    }
+    return coefficients;
+  }
 
 public:
   void Run() {
+    ConsoleUI UI;
     while (true) {
+      UI.drawMenu();
       FunctionType type = selectFunction();
       if (type == FunctionType::Exit) {
         std::cout << "Нажмите Enter для выхода ";
@@ -280,8 +293,8 @@ public:
         return;
       }
       if (type == FunctionType::About) {
-        showAbout();
-        clearScreen();
+        UI.showAbout();
+        UI.clearScreen();
         continue;
       }
       int count = getCoeffsCount(type);
@@ -290,26 +303,26 @@ public:
           FunctionFactory::CreateFunction(type, coefficients);
       if (func != nullptr) {
         std::vector<double> roots = func->Solve();
-        printResultsSolver(roots);
-        double low = inputAndCheck<double>(
+        UI.printResultsSolver(roots);
+        double low = Validator::inputAndCheck<double>(
             "Введите нижний предел: ", "Ошибка!",
             [](double val) { return std::abs(val) < 1e9; });
-        double upp = inputAndCheck<double>(
+        double upp = Validator::inputAndCheck<double>(
             "Введите верхний предел: ", "Ошибка!",
             [](double val) { return std::abs(val) < 1e9; });
         std::vector<double> integrals = func->Integrate(upp, low);
-        printResultsIntegral(integrals);
+        UI.printResultsIntegral(integrals);
       } else {
-        std::cout << "Soon\n";
+        std::cout << "Скоро\n";
       }
-      char exit =
-          inputAndCheck<char>("Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
+      char userChoiceExit =
+          Validator::inputAndCheck<char>("Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
             return val == 'y' || val == 'n' || val == 'Y' || val == 'N';
           });
-      if (exit == 'y' || exit == 'Y') {
+      if (userChoiceExit == 'y' || userChoiceExit == 'Y') {
         return;
       }
-      clearScreen();
+      UI.clearScreen();
     }
   }
 };
