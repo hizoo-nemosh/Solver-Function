@@ -4,6 +4,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 // #include <complex>
 
@@ -30,8 +31,8 @@ public:
   virtual ~MathFunction() {}
 
   virtual std::vector<double> Solve() const = 0;
-  virtual std::vector<double> Integrate(double upper_limit,
-                                        double lower_limit) const = 0;
+  virtual std::pair<double, double> Integrate(double upper_limit,
+                                              double lower_limit) const = 0;
   virtual std::vector<double> AnalysisAndDerivative() const = 0;
 };
 
@@ -49,8 +50,8 @@ public:
     return {-b / a};
   }
 
-  std::vector<double> Integrate(double upper_limit,
-                                double lower_limit) const override {
+  std::pair<double, double> Integrate(double upper_limit,
+                                      double lower_limit) const override {
     double a = m_coeffs[0];
     double b = m_coeffs[1];
 
@@ -109,8 +110,8 @@ public:
     }
   }
 
-  std::vector<double> Integrate(double upper_limit,
-                                double lower_limit) const override {
+  std::pair<double, double> Integrate(double upper_limit,
+                                      double lower_limit) const override {
     return {};
   }
 
@@ -120,7 +121,7 @@ public:
 class FunctionFactory {
 public:
   static std::unique_ptr<MathFunction>
-  CreateFunction(FunctionType type, const std::vector<double> coefficients) {
+  CreateFunction(FunctionType type, const std::vector<double> &coefficients) {
     switch (type) {
     case FunctionType::Linear: {
       if (coefficients.size() < 2) {
@@ -197,8 +198,9 @@ public:
                                                            // 4 переменных
     std::cout << "║ 4.Модуль [скоро]                       ║\n"; // a*|x-b|+c 3
                                                                  // переменная
-    std::cout << "║ 5.Корень [скоро]                       ║\n"; // a*√(x-b)+c 3
-                                                                 // переменная
+    std::cout
+        << "║ 5.Корень [скоро]                       ║\n"; // a*√(x-b)+c 3 //
+                                                           // переменная
     std::cout
         << "║ 6.Обратная пропорциональность [скоро]  ║\n"; // k/x+b 2 переменных
     std::cout
@@ -234,13 +236,10 @@ public:
       }
     }
   }
-  void printResultsIntegral(const std::vector<double> &integrals) {
-    if (integrals.size() < 2) {
-      std::cout << "Интеграл не вычислен";
-      return;
-    }
-    std::cout << "Интеграл: " << integrals[0] << "\n";
-    std::cout << "Геометрическая площадь: " << integrals[1] << "\n";
+  void printResultsIntegral(const std::pair<double, double> &integrals) {
+    auto [integral_sum, geometric_area] = integrals;
+    std::cout << "Интеграл: " << integral_sum << "\n";
+    std::cout << "Геометрическая площадь: " << geometric_area << "\n";
   }
 };
 
@@ -286,6 +285,7 @@ public:
     ConsoleUI UI;
     while (true) {
       UI.drawMenu();
+
       FunctionType type = selectFunction();
       if (type == FunctionType::Exit) {
         std::cout << "Нажмите Enter для выхода ";
@@ -297,10 +297,14 @@ public:
         UI.clearScreen();
         continue;
       }
+
       int count = getCoeffsCount(type);
+
       std::vector<double> coefficients = collectCoefficients(count);
+
       std::unique_ptr<MathFunction> func =
           FunctionFactory::CreateFunction(type, coefficients);
+
       if (func != nullptr) {
         std::vector<double> roots = func->Solve();
         UI.printResultsSolver(roots);
@@ -310,13 +314,13 @@ public:
         double upp = Validator::inputAndCheck<double>(
             "Введите верхний предел: ", "Ошибка!",
             [](double val) { return std::abs(val) < 1e9; });
-        std::vector<double> integrals = func->Integrate(upp, low);
+        std::pair<double, double> integrals = func->Integrate(upp, low);
         UI.printResultsIntegral(integrals);
       } else {
         std::cout << "Скоро\n";
       }
-      char userChoiceExit =
-          Validator::inputAndCheck<char>("Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
+      char userChoiceExit = Validator::inputAndCheck<char>(
+          "Хотите выйти? [y/n] ", "Ошибка! ", [](char val) {
             return val == 'y' || val == 'n' || val == 'Y' || val == 'N';
           });
       if (userChoiceExit == 'y' || userChoiceExit == 'Y') {
@@ -327,9 +331,8 @@ public:
   }
 };
 
-int main()
-{
-  App app;
-  app.Run();
-  return 0;
-}
+  int main() {
+    App app;
+    app.Run();
+    return 0;
+  }
